@@ -1,96 +1,170 @@
-# `@elsoul/fresh-atom`
+# `@elsoul/child-process`
 
-`@elsoul/fresh-atom` is a lightweight global state management library inspired
-by Recoil and Jotai, specifically designed for use in
-[Deno's Fresh framework](https://fresh.deno.dev/).
-
-Leveraging Preact's `signal` under the hood, it enables efficient state updates
-and reactivity, ideal for edge-native applications.
+`@elsoul/child-process` is a lightweight utility library for executing shell
+commands within [Deno](https://deno.land/). It provides simple and intuitive
+functions to run commands synchronously or asynchronously, capturing output and
+handling errors gracefully.
 
 ## Features
 
-- **Lightweight**: Minimal API surface with `atom` and `useAtom`, similar to
-  Jotai.
-- **Preact Integration**: Powered by Preact's `signal` for performance-optimized
-  reactivity.
-- **Edge-Native**: Designed to run on Deno, providing TypeScript-first
-  development with modern performance standards.
+- **Simple API**: Minimal and easy-to-use functions `exec` and `spawnSync` for
+  command execution.
+- **Error Handling**: Robust error handling with detailed messages and status
+  codes.
+- **Argument Parsing**: Advanced argument parsing that correctly handles quoted
+  strings and escaped characters.
+- **TypeScript Support**: Fully typed with TypeScript, providing type safety and
+  IntelliSense support.
+- **Cross-Platform**: Works seamlessly across different operating systems
+  supported by Deno.
 
 ## Installation
 
-To install and use `@elsoul/fresh-atom` in your project, you can import it
-directly from the JavaScript Standard Registry (JSR) or from the Deno land:
+You can import `@elsoul/child-process` directly from the JavaScript Standard
+Registry (JSR) or from Deno Land:
 
 ### Using JSR
 
 ```ts
-import { atom, useAtom } from 'jsr:@elsoul/fresh-atom'
+import { exec, spawnSync } from 'jsr:@elsoul/child-process'
 ```
 
 ### Using Deno Land
 
 ```ts
-import { atom, useAtom } from 'https://deno.land/x/fresh_atom/mod.ts'
+import { exec, spawnSync } from 'https://deno.land/x/child_process/mod.ts'
 ```
 
 ## Usage
 
-`@elsoul/fresh-atom` allows you to create shared state in your Fresh application
-with minimal effort. Here's how you can create and use atoms.
+`@elsoul/child-process` allows you to execute shell commands effortlessly within
+your Deno applications. Below are examples of how to use the provided functions.
 
-### Creating an Atom
+### Executing a Command Asynchronously
 
-Atoms hold a single piece of state. You can define an atom like this:
+The `exec` function runs a command and collects its output asynchronously.
 
 ```ts
-import { atom } from '@elsoul/fresh-atom'
+import { exec } from '@elsoul/child-process'
 
-const countAtom = atom(0) // Create an atom with an initial value of 0
-```
+const result = await exec('echo "Hello, World!"')
 
-### Using an Atom in a Component
-
-To read and modify the atom's value inside a component, you can use `useAtom`:
-
-```tsx
-import { useAtom } from '@elsoul/fresh-atom'
-
-export default function Counter() {
-  const [count, setCount] = useAtom(countAtom)
-
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-    </div>
-  )
+if (result.success) {
+  console.log('Command Output:', result.message)
+} else {
+  console.error('Command Failed:', result.message)
 }
 ```
 
-The state will automatically update whenever the atom's value changes, ensuring
-efficient re-rendering.
+**Output:**
 
-### Advanced: Async Atom
-
-You can also define an asynchronous atom that resolves after some operation:
-
-```ts
-import { atom } from '@elsoul/fresh-atom'
-
-const asyncAtom = atom(async () => {
-  const data = await fetchData()
-  return data
-})
+```
+Command Output: Hello, World!
 ```
 
-You can then use `useAtom` in the same way to handle asynchronous state.
+### Spawning a Process Synchronously
+
+The `spawnSync` function spawns a child process synchronously, inheriting the
+parent process's standard input/output streams.
+
+```ts
+import { spawnSync } from '@elsoul/child-process'
+
+const result = await spawnSync('ls -la')
+
+if (result.success) {
+  console.log('Process completed successfully.')
+} else {
+  console.error('Process failed:', result.message)
+}
+```
+
+**Output:**
+
+```
+(total output of `ls -la` command)
+Process completed successfully.
+```
+
+### Handling Errors
+
+Both `exec` and `spawnSync` provide detailed error information when a command
+fails.
+
+```ts
+import { exec } from '@elsoul/child-process'
+
+const result = await exec('some-invalid-command')
+
+if (!result.success) {
+  console.error('Error Message:', result.message)
+}
+```
+
+**Output:**
+
+```
+Error Message: Failed to execute command: some-invalid-command
+Error output: some-invalid-command: command not found
+```
+
+### Advanced Argument Parsing
+
+The library handles complex command strings with quotes and escaped characters.
+
+```ts
+import { exec } from '@elsoul/child-process';
+
+const result = await exec('echo "This is a test with spaces and 'single quotes'"');
+
+console.log('Command Output:', result.message);
+```
+
+**Output:**
+
+```
+Command Output: This is a test with spaces and 'single quotes'
+```
+
+## API Reference
+
+### Interfaces
+
+#### `ExecResult`
+
+Represents the result of a command execution.
+
+- `success: boolean` - Indicates if the command executed successfully.
+- `message: string` - The output or error message from the command.
+
+### Functions
+
+#### `exec(cmd: string): Promise<ExecResult>`
+
+Executes a command asynchronously and collects its output.
+
+- **Parameters:**
+  - `cmd: string` - The command to execute.
+- **Returns:** `Promise<ExecResult>` - The result of the command execution.
+
+#### `spawnSync(cmd: string): Promise<ExecResult>`
+
+Spawns a child process synchronously, inheriting standard I/O streams.
+
+- **Parameters:**
+  - `cmd: string` - The command to execute.
+- **Returns:** `Promise<ExecResult>` - The result of the process execution.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at
-https://github.com/elsoul/fresh-atom This project is intended to be a safe,
-welcoming space for collaboration, and contributors are expected to adhere to
-the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Contributions are welcome! Please feel free to submit a pull request or open an
+issue on GitHub:
+
+- [GitHub Repository](https://github.com/elsoul/child-process)
+
+This project is intended to be a safe, welcoming space for collaboration, and
+contributors are expected to adhere to the
+[Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -99,6 +173,6 @@ The package is available as open source under the terms of the
 
 ## Code of Conduct
 
-Everyone interacting in the SKEET project’s codebases, issue trackers, chat
-rooms and mailing lists is expected to follow the
-[code of conduct](https://github.com/elsoul/skeet/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the `@elsoul/child-process` project’s codebases, issue
+trackers, chat rooms, and mailing lists is expected to follow the
+[code of conduct](https://github.com/elsoul/child-process/blob/master/CODE_OF_CONDUCT.md).
