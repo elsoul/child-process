@@ -54,15 +54,20 @@ export interface ExecResult {
 /**
  * Spawns a child process synchronously, inheriting the parent's stdio streams.
  * @param cmd - The command to execute.
+ * @param cwd - The working directory for the command.
  * @returns A Promise resolving to an ExecResult containing success status and message.
  */
-export const spawnSync = async (cmd: string): Promise<ExecResult> => {
+export const spawnSync = async (
+  cmd: string,
+  cwd?: string,
+): Promise<ExecResult> => {
   try {
     const argsArray = splitArgs(cmd)
     const firstCmd = argsArray[0]
     const args = argsArray.slice(1)
     const command = new Deno.Command(firstCmd, {
       args,
+      cwd,
       stdin: 'inherit',
       stdout: 'inherit',
       stderr: 'inherit',
@@ -91,15 +96,17 @@ export const spawnSync = async (cmd: string): Promise<ExecResult> => {
 /**
  * Executes a command and collects its output.
  * @param cmd - The command to execute.
+ * @param cwd - The working directory for the command.
  * @returns A Promise resolving to an ExecResult containing success status and output message.
  */
-export const exec = async (cmd: string): Promise<ExecResult> => {
+export const exec = async (cmd: string, cwd?: string): Promise<ExecResult> => {
   try {
     const argsArray = splitArgs(cmd)
     const firstCmd = argsArray[0]
     const args = argsArray.slice(1)
     const command = new Deno.Command(firstCmd, {
       args,
+      cwd,
     })
 
     // Create a subprocess and collect its output
