@@ -154,3 +154,38 @@ const handleError = (error: unknown): ExecResult => {
     }
   }
 }
+
+/**
+ * Executes an SSH command on a remote server synchronously.
+ *
+ * This function constructs and executes an SSH command using a specified RSA key,
+ * user credentials, and host address. It navigates to the specified working directory (cwd),
+ * sources the user profile, and executes the provided command.
+ *
+ * @param {string} user - The SSH username to use for connection.
+ * @param {string} host - The hostname or IP address of the remote server.
+ * @param {string} rsaKeyPath - The path to the RSA private key for authentication.
+ * @param {string} execCmd - The command to execute on the remote server.
+ * @param {string} [cwd='~'] - The working directory on the remote server. Defaults to the home directory.
+ * @returns {Promise<ExecResult>} - A Promise that resolves to an object containing the success status and message.
+ *
+ * @example
+ * // Executes 'solana --version' command on a remote server
+ * const user = 'solv'
+ * const host = '145.40.126.169'
+ * const rsaKey = '~/.ssh/id_rsa'
+ * const execCmd = `solana --version`
+ *
+ * await sshCmd(user, host, rsaKey, execCmd)
+ */
+export const sshCmd = async (
+  user: string,
+  host: string,
+  rsaKeyPath: string,
+  execCmd: string,
+  cwd = '~',
+): Promise<ExecResult> => {
+  const cmd =
+    `ssh -i ${rsaKeyPath} -o StrictHostKeyChecking=no ${user}@${host} -p 22 'cd ${cwd} && source ~/.profile && ${execCmd}'`
+  return await spawnSync(cmd)
+}

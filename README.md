@@ -7,8 +7,8 @@ handling errors gracefully.
 
 ## Features
 
-- **Simple API**: Minimal and easy-to-use functions `exec` and `spawnSync` for
-  command execution.
+- **Simple API**: Minimal and easy-to-use functions `exec`, `spawnSync`, and
+  `sshCmd` for command execution.
 - **Error Handling**: Robust error handling with detailed messages and status
   codes.
 - **Argument Parsing**: Advanced argument parsing that correctly handles quoted
@@ -26,13 +26,17 @@ Registry (JSR) or from Deno Land:
 ### Using JSR
 
 ```ts
-import { exec, spawnSync } from 'jsr:@elsoul/child-process'
+import { exec, spawnSync, sshCmd } from 'jsr:@elsoul/child-process'
 ```
 
 ### Using Deno Land
 
 ```ts
-import { exec, spawnSync } from 'https://deno.land/x/child_process/mod.ts'
+import {
+  exec,
+  spawnSync,
+  sshCmd,
+} from 'https://deno.land/x/child_process/mod.ts'
 ```
 
 ## Usage
@@ -84,6 +88,35 @@ if (result.success) {
 ```
 (total output of `ls -la` command)
 Process completed successfully.
+```
+
+### Executing SSH Commands Remotely
+
+The `sshCmd` function allows you to execute commands on a remote server via SSH
+using an RSA key for authentication. It also allows specifying the working
+directory on the remote server.
+
+```ts
+import { sshCmd } from '@elsoul/child-process'
+
+const result = await sshCmd(
+  'solv',
+  'x.x.x.x',
+  '~/.ssh/id_rsa',
+  'solana --version',
+)
+
+if (result.success) {
+  console.log('Command Output:', result.message)
+} else {
+  console.error('Command Failed:', result.message)
+}
+```
+
+**Output:**
+
+```
+Command Output: solana-cli 1.8.5 (src:1a2bc3d4)
 ```
 
 ### Handling Errors
@@ -154,6 +187,19 @@ Spawns a child process synchronously, inheriting standard I/O streams.
 - **Parameters:**
   - `cmd: string` - The command to execute.
 - **Returns:** `Promise<ExecResult>` - The result of the process execution.
+
+#### `sshCmd(user: string, host: string, rsaKeyPath: string, execCmd: string, cwd = '~'): Promise<ExecResult>`
+
+Executes an SSH command on a remote server synchronously.
+
+- **Parameters:**
+  - `user: string` - The SSH username to use for connection.
+  - `host: string` - The hostname or IP address of the remote server.
+  - `rsaKeyPath: string` - The path to the RSA private key for authentication.
+  - `execCmd: string` - The command to execute on the remote server.
+  - `cwd: string` - The working directory on the remote server. Defaults to the
+    home directory.
+- **Returns:** `Promise<ExecResult>` - The result of the SSH command execution.
 
 ## Contributing
 
