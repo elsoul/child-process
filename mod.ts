@@ -114,17 +114,14 @@ export const exec = async (cmd: string, cwd?: string): Promise<ExecResult> => {
 
     if (code !== 0) {
       const errorOutput = new TextDecoder().decode(stderr).trim()
-      throw new Error(
-        `Failed to execute command: ${cmd}\nError output: ${errorOutput}`,
-      )
+      return {
+        success: false,
+        message: errorOutput,
+      }
     }
 
     const output = new TextDecoder().decode(stdout).trim()
 
-    const errorOutput = new TextDecoder().decode(stderr).trim()
-    if (errorOutput) {
-      console.error(errorOutput)
-    }
     return {
       success: true,
       message: output,
@@ -147,7 +144,6 @@ const handleError = (error: unknown): ExecResult => {
       message: error.message,
     }
   } else {
-    console.error('Unknown error:', error)
     return {
       success: false,
       message: 'An unknown error occurred',
